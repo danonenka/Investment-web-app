@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, select
+from sqlalchemy import Column, Integer, String, Text, TIMESTAMP
 from sqlalchemy.sql import func
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost/file_converter_db"
@@ -20,5 +20,10 @@ class FileModel(Base):
 
     id = Column(Integer, primary_key=True)
     original_name = Column(String(255))
-    processed_path = Column(String(500))  # Путь к обработанному файлу
+    processed_path = Column(String(500))
     created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
