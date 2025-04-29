@@ -13,7 +13,7 @@ import os
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIR = "uploads"
+UPLOAD_DIR = "processed_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
@@ -28,19 +28,28 @@ async def get_db():
         yield session
 
 
-def process_excel(file_path: str) -> str:
-    # Чтение Excel файла
-    df = pd.read_excel(file_path)
+def process_excel(file_content: bytes) -> tuple[str, bytes]:
+    # Чтение Excel из памяти
+    df = pd.read_excel(BytesIO(file_content))
 
-    # Пример обработки: транспонирование матрицы и добавление колонки с суммой
+    # Пример обработки
     processed_df = df.T
     processed_df['Total'] = np.sum(processed_df, axis=1)
 
-    # Сохранение обработанного файла
-    output_path = os.path.join(UPLOAD_DIR, f"processed_{uuid.uuid4().hex}.xlsx")
-    processed_df.to_excel(output_path, index=False)
+    # Сохранение в буфер
+    output = BytesIO()
+    processed_df.to_excel(output, index=False)
+    output.seek(0)
 
-    return output_path
+    # Генерация уникального имени
+    filename = f"processed_{uuid.uuid4().hex}.xlsx"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    # Сохраняем только обработанный файл
+    with open(file_path, "wb") as f:
+        f.write(output.getvalue())
+
+    return filename, file_path
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -54,18 +63,16 @@ async def upload_file(
         file: UploadFile = FastAPIFile(...),
         db: AsyncSession = Depends(get_db)
 ):
-    # Сохраняем оригинальный файл
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+    # Читаем содержимое файла в память
+    content = await file.read()
 
     # Обработка файла
-    processed_path = process_excel(file_path)
+    processed_filename, processed_path = process_excel(content)
 
     # Сохраняем информацию в БД
     db_file = FileModel(
         original_name=file.filename,
-        processed_path=processed_path  # Сохраняем путь к обработанному файлу
+        processed_path=processed_path
     )
     db.add(db_file)
     await db.commit()
