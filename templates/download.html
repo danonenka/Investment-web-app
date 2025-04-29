@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download File</title>
+</head>
+<body>
+    <h1>Processed File: {{ filename }}</h1>
+    <a href="data:text/plain;charset=utf-8,{{ content }}" download="{{ filename }}">
+        Download Processed File
+    </a>
+</body>
+</html>
