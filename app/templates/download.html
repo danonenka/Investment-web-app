@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Download File</title>
+    <title>Результаты оптимизации</title>
 </head>
 <body>
-    <h1>Processed File: {{ filename }}</h1>
-    <a href="/download/{{ file_id }}">Download Processed Excel File</a>
-    <br>
-    <a href="/">Upload another file</a>
+    <h1>Результаты для файла: {{ filename }}</h1>
+
+    <h2>Основные показатели:</h2>
+    <ul>
+        <li>Максимальная прибыль: {{ max_profit }} млн</li>
+        <li>Общие инвестиции: {{ statistics.total_investment }} млн</li>
+        <li>ROI: {{ (statistics.roi * 100)|round(2) }}%</li>
+    </ul>
+
+    <h2>Распределение инвестиций:</h2>
+    <table border="1">
+        <tr>
+            <th>Предприятие</th>
+            <th>Инвестиции (млн)</th>
+            <th>Прибыль (млн)</th>
+            <th>ROI (%)</th>
+        </tr>
+        {% for enterprise in statistics.enterprises %}
+        <tr>
+            <td>{{ enterprise.enterprise_id }}</td>
+            <td>{{ enterprise.investment }}</td>
+            <td>{{ enterprise.profit }}</td>
+            <td>{{ (enterprise.roi * 100)|round(2) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Скачать полный отчет:</h3>
+    <a href="/download-file/{{ file_id }}">Скачать Excel отчет</a>
+
+    <br><br>
+    <a href="/">Новый расчет</a>
 </body>
 </html>
