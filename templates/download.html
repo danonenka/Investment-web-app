@@ -5,8 +5,8 @@
 </head>
 <body>
     <h1>Processed File: {{ filename }}</h1>
-    <a href="data:text/plain;charset=utf-8,{{ content }}" download="{{ filename }}">
-        Download Processed File
-    </a>
+    <a href="/download/{{ file_id }}">Download Processed Excel File</a>
+    <br>
+    <a href="/">Upload another file</a>
 </body>
 </html>

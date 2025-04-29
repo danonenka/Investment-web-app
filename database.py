@@ -15,10 +15,10 @@ AsyncSessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 
-class FileModel(Base):  # Переименовываем класс
+class FileModel(Base):
     __tablename__ = "files"
 
     id = Column(Integer, primary_key=True)
     original_name = Column(String(255))
-    processed_content = Column(Text)
+    processed_path = Column(String(500))  # Путь к обработанному файлу
     created_at = Column(TIMESTAMP, server_default=func.now())
