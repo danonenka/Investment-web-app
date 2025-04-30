@@ -12,13 +12,3 @@ app.include_router(files.router)
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-
-@app.on_event("startup")
-async def startup():
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        print("✅ Tables created successfully")
-    except Exception as e:
-        print(f"❌ Error creating tables: {e}")
